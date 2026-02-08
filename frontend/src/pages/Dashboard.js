@@ -4,6 +4,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
+  const API_BASE = "https://savingsgoaltracker.onrender.com/api";
   const [token, setToken] = useState(() => localStorage.getItem("token"));
   const [loading, setLoading] = useState(true); // New loading state
   const navigate = useNavigate();
