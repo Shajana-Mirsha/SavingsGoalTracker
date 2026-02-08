@@ -41,7 +41,7 @@ export default function Register() {
           Create Account
         </button>
         <a
-  href="http://localhost:5000/api/auth/google"
+  href="https://savingsgoaltracker.onrender.com/auth/google"
   style={{ textDecoration: "none" }}
 >
   <button
