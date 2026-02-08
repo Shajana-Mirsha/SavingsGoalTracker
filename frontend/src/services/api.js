@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "https://savingsgoaltracker.onrender.com/api"
+  baseURL: "https://savingsgoaltracker.onrender.com/api",
 
 });
 
