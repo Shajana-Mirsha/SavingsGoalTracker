@@ -24,7 +24,7 @@ router.get(
     );
 
     res.redirect(
-      `https://savings-goal-tracker-frontend.onrender.com/dashboard?token=${token}`
+      "https://savings-goal-tracker-frontend.onrender.com/dashboard?token=" + token
     );
   }
 );
