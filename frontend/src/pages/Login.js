@@ -44,6 +44,24 @@ export default function Login() {
         <p style={{ marginTop: '20px', fontSize: '0.9rem' }}>
           Don't have an account? <Link to="/register" style={{ color: 'var(--primary)', fontWeight: '600' }}>Register here</Link>
         </p>
+        <a
+  href="http://localhost:5000/api/auth/google"
+  style={{ textDecoration: "none" }}
+>
+  <button
+    type="button"
+    className="btn"
+    style={{
+      width: "100%",
+      background: "#db4437",
+      color: "white",
+      marginTop: "10px"
+    }}
+  >
+    Sign in with Google
+  </button>
+</a>
+
       </form>
     </div>
   );

@@ -1,45 +1,39 @@
 const SavingsGoal = require("../models/SavingsGoal");
 
-exports.createGoal = async (req, res) => {
+const getGoals = async (req, res) => {
   try {
-    const { goalName, targetAmount } = req.body;
-
-    // ✅ VALIDATION
-    if (!goalName || !targetAmount) {
-      return res.status(400).json({ message: "Missing fields" });
-    }
-
-    const goal = await SavingsGoal.create({
-      userId: req.userId,        // 👈 THIS WAS THE ISSUE
-      goalName,
-      targetAmount: Number(targetAmount),
-      savedAmount: 0,
-      history: []
-    });
-
-    res.status(201).json(goal);
-  } catch (err) {
-    console.error("CREATE GOAL ERROR:", err);
-    res.status(500).json({ message: "Failed to create goal" });
-  }
-};
-
-exports.getGoals = async (req, res) => {
-  try {
+    // Find goals where userId matches the logged-in user
     const goals = await SavingsGoal.find({ userId: req.userId });
     res.json(goals);
   } catch (err) {
-    res.status(500).json({ message: "Failed to fetch goals" });
+    res.status(500).json({ message: "Server error fetching goals" });
   }
 };
 
-exports.updateGoal = async (req, res) => {
+const createGoal = async (req, res) => {
   try {
-    const goal = await SavingsGoal.findById(req.params.id);
+    const { goalName, targetAmount } = req.body;
+    const newGoal = new SavingsGoal({
+      userId: req.userId,
+      goalName,
+      targetAmount,
+      savedAmount: 0,
+      history: []
+    });
+    await newGoal.save();
+    res.status(201).json(newGoal);
+  } catch (err) {
+    res.status(500).json({ message: "Server error creating goal" });
+  }
+};
+
+const updateGoal = async (req, res) => {
+  try {
+    const goal = await SavingsGoal.findOne({ _id: req.params.id, userId: req.userId });
     const amount = Number(req.body.savedAmount);
 
     if (!goal || amount <= 0) {
-      return res.status(400).json({ message: "Invalid update" });
+      return res.status(400).json({ message: "Invalid update or goal not found" });
     }
 
     goal.savedAmount += amount;
@@ -56,11 +50,20 @@ exports.updateGoal = async (req, res) => {
   }
 };
 
-exports.deleteGoal = async (req, res) => {
+const deleteGoal = async (req, res) => {
   try {
-    await SavingsGoal.findByIdAndDelete(req.params.id);
+    const result = await SavingsGoal.findOneAndDelete({ _id: req.params.id, userId: req.userId });
+    if (!result) return res.status(404).json({ message: "Goal not found" });
     res.json({ message: "Goal deleted" });
   } catch (err) {
     res.status(500).json({ message: "Delete failed" });
   }
+};
+
+// Exporting all functions as an object to fix the "handler must be a function" error
+module.exports = {
+  getGoals,
+  createGoal,
+  updateGoal,
+  deleteGoal
 };

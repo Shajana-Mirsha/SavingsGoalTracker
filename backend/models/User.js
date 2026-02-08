@@ -6,10 +6,18 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
+
+  // password is optional for Google users
   password: {
     type: String,
-    required: true
+    default: null
   },
+
+  googleId: {
+    type: String,
+    default: null
+  },
+
   createdAt: {
     type: Date,
     default: Date.now

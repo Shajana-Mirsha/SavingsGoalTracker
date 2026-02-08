@@ -40,7 +40,24 @@ export default function Register() {
         <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '15px', background: 'var(--accent)' }}>
           Create Account
         </button>
-        
+        <a
+  href="http://localhost:5000/api/auth/google"
+  style={{ textDecoration: "none" }}
+>
+  <button
+    type="button"
+    className="btn"
+    style={{
+      width: "100%",
+      background: "#db4437",
+      color: "white",
+      marginTop: "12px"
+    }}
+  >
+    Sign up with Google
+  </button>
+</a>
+
         <p style={{ marginTop: '20px', fontSize: '0.9rem' }}>
           Already registered? <Link to="/" style={{ color: 'var(--primary)', fontWeight: '600' }}>Login</Link>
         </p>
