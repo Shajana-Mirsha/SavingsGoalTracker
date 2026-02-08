@@ -9,24 +9,26 @@ passport.use(
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       callbackURL: "https://savingsgoaltracker.onrender.com/api/auth/google/callback",
     },
-    async (accessToken, refreshToken, profile, done) => {
-      try {
-        const email = profile.emails[0].value;
+async (accessToken, refreshToken, profile, done) => {
+  try {
+    const email = profile.emails[0].value;
 
-        let user = await User.findOne({ email });
+    // 🔹 IMPORTANT: find by email FIRST
+    let user = await User.findOne({ email });
 
-        if (!user) {
-          user = await User.create({
-            email,
-            password: "GOOGLE_AUTH", // dummy password
-          });
-        }
-
-        return done(null, user);
-      } catch (err) {
-        return done(err, null);
-      }
+    // Only create user if email does not exist
+    if (!user) {
+      user = await User.create({
+        email,
+        password: "GOOGLE_AUTH"
+      });
     }
+
+    return done(null, user);
+  } catch (err) {
+    return done(err, null);
+  }
+}
   )
 );
 
