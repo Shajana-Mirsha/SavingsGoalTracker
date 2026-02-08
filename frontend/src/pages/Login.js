@@ -45,7 +45,7 @@ export default function Login() {
           Don't have an account? <Link to="/register" style={{ color: 'var(--primary)', fontWeight: '600' }}>Register here</Link>
         </p>
         <a
-  href="http://localhost:5000/api/auth/google"
+  href="https://savingsgoaltracker.onrender.com/auth/google"
   style={{ textDecoration: "none" }}
 >
   <button
