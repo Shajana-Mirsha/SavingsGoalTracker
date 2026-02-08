@@ -95,7 +95,7 @@ export default function Dashboard() {
   const deleteGoal = async (id) => {
     if (window.confirm("Delete this goal permanently?")) {
       try {
-        await axios.delete(`http://localhost:5000/api/goals/${id}`, {
+        await axios.delete(`${API_BASE}/goals/${id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         loadData();
