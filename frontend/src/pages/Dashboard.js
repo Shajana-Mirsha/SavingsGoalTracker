@@ -306,7 +306,7 @@ export default function Dashboard() {
                         </div>
                         <div style={{ display: 'flex', gap: '10px' }}>
                           <input style={{ width: "80px", padding: "8px", fontSize: '0.9rem' }} type="number" placeholder="Amt" value={addMap[g._id] || ""} onChange={(e) => setAddMap({...addMap, [g._id]: e.target.value})} />
-                          <button className="btn btn-add" style={{ padding: '8px 16px', fontSize: '0.9rem' }} onClick={async () => { if(addMap[g._id] > 0) { await axios.put(`http://localhost:5000/api/goals/${g._id}`, { savedAmount: Number(addMap[g._id]) }, { headers: { Authorization: `Bearer ${token}` } }); setAddMap({...addMap, [g._id]: ""}); loadData(); } }}>Add</button>
+                          <button className="btn btn-add" style={{ padding: '8px 16px', fontSize: '0.9rem' }} onClick={async () => { if(addMap[g._id] > 0) { await axios.put(`${API_BASE}/goals/${g._id}`, { savedAmount: Number(addMap[g._id]) }, { headers: { Authorization: `Bearer ${token}` } }); setAddMap({...addMap, [g._id]: ""}); loadData(); } }}>Add</button>
                         </div>
                       </div>
                       <button onClick={() => setExpandedGoal(expandedGoal === g._id ? null : g._id)} style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 'bold', marginTop: '15px' }}>{expandedGoal === g._id ? "Hide History ▲" : "View History ▼"}</button>
