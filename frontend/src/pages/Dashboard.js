@@ -308,13 +308,19 @@ export default function Dashboard() {
                           <input style={{ width: "80px", padding: "8px", fontSize: '0.9rem' }} type="number" placeholder="Amt" value={addMap[g._id] || ""} onChange={(e) => setAddMap({...addMap, [g._id]: e.target.value})} />
                           <button className="btn btn-add" style={{ padding: '8px 16px', fontSize: '0.9rem' }} onClick={async () => { 
                             if(addMap[g._id] > 0) { 
-                              await axios.put(
-                                `${API_BASE}/goals/${g._id}`,
-                                { amount: Number(addMap[g._id]) },
-                                { headers: { Authorization: `Bearer ${token}` } }
-                              );
-                              setAddMap({ ...addMap, [g._id]: "" }); // Clear input field
-                              loadData(); // REFRESH DATA TO UPDATE UI
+                              try {
+                                await axios.put(
+                                  `${API_BASE}/goals/${g._id}`,
+                                  { amount: Number(addMap[g._id]) },
+                                  { headers: { Authorization: `Bearer ${token}` } }
+                                );
+                                // Update input map to clear the field for this specific goal
+                                setAddMap(prev => ({...prev, [g._id]: ""}));
+                                // Re-fetch all goals to update the UI
+                                await loadData();
+                              } catch (err) {
+                                console.error("Error updating goal:", err);
+                              }
                             } 
                           }}>Add</button>
                         </div>
