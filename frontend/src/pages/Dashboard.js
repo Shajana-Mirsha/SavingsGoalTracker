@@ -306,33 +306,43 @@ export default function Dashboard() {
                         </div>
                         <div style={{ display: 'flex', gap: '10px' }}>
                           <input style={{ width: "80px", padding: "8px", fontSize: '0.9rem' }} type="number" placeholder="Amt" value={addMap[g._id] || ""} onChange={(e) => setAddMap({...addMap, [g._id]: e.target.value})} />
-                          <button 
-  className="btn btn-add" 
-  style={{ padding: '8px 16px', fontSize: '0.9rem' }} 
-  onClick={async () => { 
-    if(addMap[g._id] > 0) { 
-      try {
-        // 1. Changed 'amount' to 'savedAmount' to match backend requirements 
-        await axios.put(
-          `${API_BASE}/goals/${g._id}`,
-          { savedAmount: Number(addMap[g._id]) }, 
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-
-        // 2. Clear the input field for this specific goal immediately 
-        setAddMap(prev => ({...prev, [g._id]: ""}));
-
-        // 3. Immediately re-fetch all goals to update the UI instantly [cite: 133]
-        await loadData(); 
-
-      } catch (err) {
-        console.error("Error updating goal:", err);
+                          <button className="btn btn-add" style={{ padding: '8px 16px', fontSize: '0.9rem' }} onClick={async () => { 
+  const addAmount = Number(addMap[g._id]);
+  if(addAmount > 0) { 
+    // --- OPTIMISTIC UPDATE (INSTANT) ---
+    // Update the local goals state immediately without waiting for the server
+    setGoals(prevGoals => prevGoals.map(goal => {
+      if (goal._id === g._id) {
+        return {
+          ...goal,
+          savedAmount: goal.savedAmount + addAmount,
+          history: [...goal.history, { amount: addAmount, date: new Date() }]
+        };
       }
-    } 
-  }}
->
-  Add
-</button>
+      return goal;
+    }));
+
+    // Clear the input box immediately
+    setAddMap(prev => ({...prev, [g._id]: ""}));
+
+    try {
+      // --- BACKGROUND SERVER UPDATE ---
+      await axios.put(
+        `${API_BASE}/goals/${g._id}`,
+        { savedAmount: addAmount }, 
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      // We don't NEED to call loadData() here because we already updated the state locally!
+      // But we can call it without 'await' to sync with server in the background
+      loadData();
+                              } catch (err) {
+                                console.error("Error updating goal:", err);
+                                alert("Failed to save to server. Reverting changes...");
+                                loadData();
+                              }
+                            } 
+                          }}>Add</button>
                         </div>
                       </div>
                       <button onClick={() => setExpandedGoal(expandedGoal === g._id ? null : g._id)} style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 'bold', marginTop: '15px' }}>{expandedGoal === g._id ? "Hide History ▲" : "View History ▼"}</button>
