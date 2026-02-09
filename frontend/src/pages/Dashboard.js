@@ -311,7 +311,7 @@ export default function Dashboard() {
                               try {
                                 await axios.put(
                                   `${API_BASE}/goals/${g._id}`,
-                                  { amount: Number(addMap[g._id]) },
+                                  { savedAmount: Number(addMap[g._id]) },
                                   { headers: { Authorization: `Bearer ${token}` } }
                                 );
                                 // Update input map to clear the field for this specific goal
