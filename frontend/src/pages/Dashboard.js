@@ -306,23 +306,33 @@ export default function Dashboard() {
                         </div>
                         <div style={{ display: 'flex', gap: '10px' }}>
                           <input style={{ width: "80px", padding: "8px", fontSize: '0.9rem' }} type="number" placeholder="Amt" value={addMap[g._id] || ""} onChange={(e) => setAddMap({...addMap, [g._id]: e.target.value})} />
-                          <button className="btn btn-add" style={{ padding: '8px 16px', fontSize: '0.9rem' }} onClick={async () => { 
-                            if(addMap[g._id] > 0) { 
-                              try {
-                                await axios.put(
-                                  `${API_BASE}/goals/${g._id}`,
-                                  { savedAmount: Number(addMap[g._id]) },
-                                  { headers: { Authorization: `Bearer ${token}` } }
-                                );
-                                // Update input map to clear the field for this specific goal
-                                setAddMap(prev => ({...prev, [g._id]: ""}));
-                                // Re-fetch all goals to update the UI
-                                await loadData();
-                              } catch (err) {
-                                console.error("Error updating goal:", err);
-                              }
-                            } 
-                          }}>Add</button>
+                          <button 
+  className="btn btn-add" 
+  style={{ padding: '8px 16px', fontSize: '0.9rem' }} 
+  onClick={async () => { 
+    if(addMap[g._id] > 0) { 
+      try {
+        // 1. Changed 'amount' to 'savedAmount' to match backend requirements 
+        await axios.put(
+          `${API_BASE}/goals/${g._id}`,
+          { savedAmount: Number(addMap[g._id]) }, 
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        // 2. Clear the input field for this specific goal immediately 
+        setAddMap(prev => ({...prev, [g._id]: ""}));
+
+        // 3. Immediately re-fetch all goals to update the UI instantly [cite: 133]
+        await loadData(); 
+
+      } catch (err) {
+        console.error("Error updating goal:", err);
+      }
+    } 
+  }}
+>
+  Add
+</button>
                         </div>
                       </div>
                       <button onClick={() => setExpandedGoal(expandedGoal === g._id ? null : g._id)} style={{ background: 'none', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 'bold', marginTop: '15px' }}>{expandedGoal === g._id ? "Hide History ▲" : "View History ▼"}</button>
