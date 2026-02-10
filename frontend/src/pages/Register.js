@@ -1,67 +1,91 @@
 import { useState } from "react";
 import { registerUser } from "../services/api";
 import { useNavigate, Link } from "react-router-dom";
+import { IndianRupee, UserPlus, Mail, Lock, User } from "lucide-react";
 
 export default function Register() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [formData, setFormData] = useState({ name: "", email: "", password: "" });
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      await registerUser({ email, password });
-      alert("Registration successful! Now please login.");
-      navigate("/"); // Move to login page
-    } catch (error) {
-      alert(error.response?.data?.message || "User already exists or server error");
+      await registerUser(formData);
+      alert("Registration Successful! Please Login.");
+      navigate("/"); 
+    } catch (err) {
+      alert(err.response?.data?.message || "Registration Failed. Email might already exist.");
     }
   };
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-      <form className="glass-panel" style={{ width: '380px', textAlign: 'center' }} onSubmit={handleRegister}>
-        <h2 style={{ marginBottom: '10px' }}>Join Us</h2>
-        <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '20px' }}>Start tracking your financial goals</p>
+    <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0f172a' }}>
+      <div className="card-pro" style={{ width: '450px', padding: '50px', textAlign: 'center', background: 'white' }}>
         
-        <input 
-          type="email" 
-          placeholder="Enter Email" 
-          required 
-          onChange={(e) => setEmail(e.target.value)} 
-        />
-        <input 
-          type="password" 
-          placeholder="Create Password" 
-          required 
-          onChange={(e) => setPassword(e.target.value)} 
-        />
-        
-        <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '15px', background: 'var(--accent)' }}>
-          Create Account
-        </button>
-        <a
-  href="https://savingsgoaltracker.onrender.com/api/auth/google"
-  style={{ textDecoration: "none" }}
->
-  <button
-    type="button"
-    className="btn"
-    style={{
-      width: "100%",
-      background: "#db4437",
-      color: "white",
-      marginTop: "12px"
-    }}
-  >
-    Sign up with Google
-  </button>
-</a>
+        {/* Logo */}
+        <div style={{ background: 'var(--primary)', color: 'white', width: '60px', height: '60px', borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 25px' }}>
+          <IndianRupee size={32} strokeWidth={3} />
+        </div>
 
-        <p style={{ marginTop: '20px', fontSize: '0.9rem' }}>
-          Already registered? <Link to="/" style={{ color: 'var(--primary)', fontWeight: '600' }}>Login</Link>
+        <h2 style={{ fontSize: '32px', margin: '0 0 10px 0', letterSpacing: '-1.5px', fontWeight: '900' }}>Join Vault.Pro</h2>
+        <p style={{ color: 'var(--text-muted)', marginBottom: '35px' }}>Start tracking your Indian financial milestones</p>
+
+        {/* Registration Form */}
+        <form onSubmit={handleRegister} style={{ display: 'grid', gap: '18px' }}>
+          <div style={{ position: 'relative' }}>
+            <User size={18} style={{ position: 'absolute', left: '15px', top: '16px', color: 'var(--text-muted)' }} />
+            <input 
+              className="pro-input" style={{ paddingLeft: '45px' }} 
+              placeholder="Full Name" required 
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })} 
+            />
+          </div>
+
+          <div style={{ position: 'relative' }}>
+            <Mail size={18} style={{ position: 'absolute', left: '15px', top: '16px', color: 'var(--text-muted)' }} />
+            <input 
+              className="pro-input" style={{ paddingLeft: '45px' }} 
+              type="email" placeholder="Email Address" required 
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })} 
+            />
+          </div>
+
+          <div style={{ position: 'relative' }}>
+            <Lock size={18} style={{ position: 'absolute', left: '15px', top: '16px', color: 'var(--text-muted)' }} />
+            <input 
+              className="pro-input" style={{ paddingLeft: '45px' }} 
+              type="password" placeholder="Create Password" required 
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })} 
+            />
+          </div>
+
+          <button type="submit" className="btn-primary" style={{ marginTop: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+            <UserPlus size={20} /> Register Workspace
+          </button>
+        </form>
+
+        {/* --- PROFESSIONAL DIVIDER --- */}
+        <div style={{ margin: '25px 0', display: 'flex', alignItems: 'center', gap: '10px', color: '#cbd5e1' }}>
+          <hr style={{ flex: 1, border: '0.5px solid #e2e8f0' }} /> 
+          <span style={{ fontSize: '12px', fontWeight: '800' }}>OR</span> 
+          <hr style={{ flex: 1, border: '0.5px solid #e2e8f0' }} />
+        </div>
+
+        {/* --- GOAL: SIGN IN WITH GOOGLE --- */}
+        <button 
+          type="button"
+          className="pro-input" 
+          style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', background: 'white' }}
+          onClick={() => window.location.href = "https://savingsgoaltracker.onrender.com/api/auth/google"}
+        >
+          <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" width="22" alt="G" />
+          <span style={{ fontWeight: '700' }}>Continue with Google</span>
+        </button>
+
+        <p style={{ marginTop: '35px', color: 'var(--text-muted)', fontWeight: '600' }}>
+          Already have an account? <Link to="/" style={{ color: 'var(--primary)', fontWeight: '800', textDecoration: 'none' }}>Sign In</Link>
         </p>
-      </form>
+      </div>
     </div>
   );
 }
