@@ -1,80 +1,118 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
 
 :root {
-  --glass: rgba(255, 255, 255, 0.8);
-  --primary: #4f46e5;
-  --accent: #10b981;
-  --danger: #ff4757;
-  --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --primary: #6366f1;
+  --bg-app: #f1f5f9;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --success: #10b981;
+  --danger: #ef4444;
+  --border: #e2e8f0;
 }
 
 body {
   margin: 0;
-  font-family: 'Poppins', sans-serif;
-  background: var(--bg-gradient);
-  background-attachment: fixed;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background-color: var(--bg-app);
+  color: var(--text-main);
+}
+
+.dashboard-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
   min-height: 100vh;
-  color: #2d3436;
 }
 
-/* Glassmorphism Container */
-.glass-panel {
-  background: var(--glass);
-  backdrop-filter: blur(10px);
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  padding: 2rem;
+.sidebar {
+  background: white;
+  border-right: 1.5px solid var(--border);
+  padding: 30px 20px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Interactive Inputs */
-input {
-  width: 100%;
-  padding: 12px;
-  margin: 10px 0;
-  border-radius: 10px;
-  border: 1px solid #ddd;
-  outline: none;
-  transition: border 0.3s ease;
+.workspace {
+  padding: 40px 60px;
 }
 
-input:focus { border: 2px solid var(--primary); }
+.card-pro {
+  background: white;
+  border-radius: 24px;
+  padding: 25px;
+  border: 1.5px solid var(--border);
+  box-shadow: 0 4px 20px -5px rgba(0,0,0,0.05);
+  transition: 0.3s ease;
+}
 
-/* Dynamic Buttons */
-.btn {
-  padding: 12px 24px;
-  border-radius: 10px;
-  border: none;
-  font-weight: 600;
+.card-pro:hover { border-color: var(--primary); }
+
+/* Status Badges */
+.badge {
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.badge-active { background: #e0e7ff; color: #4338ca; }
+.badge-overdue { background: #fee2e2; color: #b91c1c; }
+.badge-success { background: #dcfce7; color: #15803d; }
+
+/* Analytics Chart */
+.bar-container {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  height: 400px;
+  padding: 40px 20px;
+  background: #ffffff;
+  border-radius: 30px;
+  border: 1px solid var(--border);
+  margin-bottom: 40px;
+  position: relative;
+}
+
+.bar-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
   cursor: pointer;
+}
+
+.bar-fill {
+  width: 60px;
+  background: #e2e8f0;
+  border-radius: 12px 12px 4px 4px;
   transition: all 0.3s ease;
 }
 
-.btn-primary { background: var(--primary); color: white; }
-.btn-primary:hover { transform: scale(1.05); box-shadow: 0 5px 15px rgba(79, 70, 229, 0.4); }
-
-.btn-add { background: var(--accent); color: white; margin-left: 10px; }
-
-/* Goal Card Styling */
-.goal-card {
-  background: white;
-  padding: 20px;
-  border-radius: 15px;
-  margin-bottom: 20px;
-  transition: transform 0.3s ease;
-}
-.goal-card:hover { transform: translateY(-5px); }
-
-.progress-bar-container {
-  background: #dfe6e9;
-  height: 12px;
-  border-radius: 10px;
-  margin: 15px 0;
-  overflow: hidden;
+.bar-fill.active {
+  background: var(--primary);
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
 }
 
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
-  transition: width 1s ease-in-out;
+.pro-input {
+  width: 100%;
+  padding: 14px 18px;
+  border-radius: 12px;
+  border: 2px solid var(--border);
+  font-size: 15px;
+  font-weight: 600;
+  box-sizing: border-box;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 14px 24px;
+  border-radius: 12px;
+  font-weight: 800;
+  cursor: pointer;
 }
