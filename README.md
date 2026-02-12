@@ -83,7 +83,7 @@ npm start
 Relationship:
 
 ```
-One User → Many Savings Goals (1:N)
+One User → Many Savings Goals (1:M)
 ```
 
 ---
