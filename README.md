@@ -21,8 +21,8 @@ Users can set a target amount, update their savings, and track progress until th
 ```
 savings-goal-tracker/
 │
-├── client/        # Frontend (React)
-├── server/        # Backend (Node + Express)
+├── backend/        # Frontend (React)
+├── frontend/        # Backend (Node + Express)
 ├── .env           # Environment configuration
 └── README.md
 ```
