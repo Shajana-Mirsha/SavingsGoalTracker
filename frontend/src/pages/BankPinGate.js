@@ -2,44 +2,42 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Lock, ShieldCheck, Eye, EyeOff, ArrowLeft } from "lucide-react";
+import logo from "../assets/logo.svg";
 
-const API = `${process.env.REACT_APP_API_URL || "http://localhost:5000/api"}/bank`;
+const API = "http://localhost:5000/api/bank";
 
 export default function BankPinGate() {
     const [pin, setPin] = useState(["", "", "", ""]);
-    const [mode, setMode] = useState("verify");
+    const [mode, setMode] = useState("verify");   // "verify" | "set" | "confirm"
     const [firstPin, setFirstPin] = useState(null);
     const [showPin, setShowPin] = useState(false);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
-    const [initializing, setInit] = useState(true);
+    const [initializing, setInit] = useState(true); // loading while checking hasPin
     const [shake, setShake] = useState(false);
     const inputs = useRef([]);
     const navigate = useNavigate();
     const token = () => localStorage.getItem("token");
 
+    // Check if PIN is already set for this account
     useEffect(() => {
         const checkPin = async () => {
             try {
-                const t = localStorage.getItem("token");
-                if (!t) {
-                    navigate("/");
-                    return;
-                }
                 const res = await axios.get(`${API}/account`, {
-                    headers: { Authorization: `Bearer ${t}` }
+                    headers: { Authorization: `Bearer ${token()}` }
                 });
+                // hasPin false or missing → this user needs to set a PIN first
                 if (!res.data.hasPin) setMode("set");
             } catch (err) {
-                const t = localStorage.getItem("token");
-                if (!t) {
+                // 401 = not logged in → redirect to login
+                // 404 = no bank account yet → go to /bank to set one up
+                if (err.response?.status === 401) {
                     navigate("/");
                 } else {
-                    // Account might not exist yet — send to dashboard to set up
-                    navigate("/dashboard");
+                    navigate("/bank");
                 }
             } finally {
-                setInit(false);
+                setInit(false); // done loading
             }
         };
         checkPin();
@@ -94,6 +92,7 @@ export default function BankPinGate() {
                 await axios.post(`${API}/set-pin`, { pin: firstPin }, {
                     headers: { Authorization: `Bearer ${token()}` }
                 });
+                // Now verify immediately with the new PIN
                 const res = await axios.post(`${API}/verify-pin`, { pin: firstPin }, {
                     headers: { Authorization: `Bearer ${token()}` }
                 });
@@ -105,6 +104,7 @@ export default function BankPinGate() {
             return;
         }
 
+        // mode === "verify"
         setLoading(true);
         try {
             const res = await axios.post(`${API}/verify-pin`, { pin: pinStr }, {
@@ -127,50 +127,37 @@ export default function BankPinGate() {
         verify: { title: "Enter Bank PIN", sub: "Verify your identity to access Vault Bank" },
     };
 
-    if (initializing) return (
-        <div style={{
-            minHeight: "100vh", background: "#060d1b",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            color: "white", fontSize: "16px", fontFamily: "inherit"
-        }}>
-            Loading...
-        </div>
-    );
-
     return (
         <>
             <style>{`
-                @keyframes pinShake {
-                    0%,100% { transform: translateX(0); }
-                    20%,60% { transform: translateX(-8px); }
-                    40%,80% { transform: translateX(8px); }
-                }
-                .pin-shake { animation: pinShake 0.4s ease; }
-                .pin-box {
-                    width: 56px; height: 64px;
-                    background: rgba(255,255,255,0.07);
-                    border: 2px solid rgba(255,255,255,0.15);
-                    border-radius: 14px;
-                    font-size: 28px; font-weight: 900;
-                    color: white; text-align: center;
-                    outline: none; caret-color: transparent;
-                    transition: border-color 0.2s, background 0.2s;
-                    font-family: monospace;
-                }
-                .pin-box:focus {
-                    border-color: #3b82f6;
-                    background: rgba(59,130,246,0.15);
-                }
-                @keyframes cardIn {
-                    from { opacity: 0; transform: translateY(30px) scale(0.97); }
-                    to   { opacity: 1; transform: translateY(0) scale(1); }
-                }
-                .pin-card { animation: cardIn 0.5s cubic-bezier(0.22,1,0.36,1) both; }
-                @keyframes orbFloat {
-                    0%,100% { transform: translateY(0); }
-                    50% { transform: translateY(-20px); }
-                }
-            `}</style>
+        @keyframes pinShake {
+          0%,100% { transform: translateX(0); }
+          20%,60% { transform: translateX(-8px); }
+          40%,80% { transform: translateX(8px); }
+        }
+        .pin-shake { animation: pinShake 0.4s ease; }
+        .pin-box {
+          width: 56px; height: 64px;
+          background: rgba(255,255,255,0.07);
+          border: 2px solid rgba(255,255,255,0.15);
+          border-radius: 14px;
+          font-size: 28px; font-weight: 900;
+          color: white; text-align: center;
+          outline: none; caret-color: transparent;
+          transition: border-color 0.2s, background 0.2s;
+          font-family: monospace;
+        }
+        .pin-box:focus {
+          border-color: #3b82f6;
+          background: rgba(59,130,246,0.15);
+        }
+        @keyframes cardIn {
+          from { opacity: 0; transform: translateY(30px) scale(0.97); }
+          to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .pin-card { animation: cardIn 0.5s cubic-bezier(0.22,1,0.36,1) both; }
+        @keyframes orbFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+      `}</style>
 
             <div style={{
                 minHeight: "100vh", background: "#060d1b",
@@ -197,22 +184,8 @@ export default function BankPinGate() {
                     boxShadow: "0 32px 80px rgba(0,0,0,0.5)",
                     position: "relative", zIndex: 10, textAlign: "center"
                 }}>
-
-                    {/* Logo — white background so it's visible on dark */}
-                    <div style={{
-                        display: "inline-flex", alignItems: "center", justifyContent: "center",
-                        background: "rgba(255,255,255,0.95)",
-                        padding: "10px 20px", borderRadius: "16px",
-                        marginBottom: "24px",
-                        boxShadow: "0 4px 20px rgba(0,0,0,0.3)"
-                    }}>
-                        <span style={{
-                            fontSize: "22px", fontWeight: "900", color: "#0f172a",
-                            letterSpacing: "-0.5px", fontFamily: "inherit"
-                        }}>
-                            🔒 Vault Bank
-                        </span>
-                    </div>
+                    {/* Logo */}
+                    <img src={logo} alt="Vault Goal" style={{ height: "52px", marginBottom: "24px" }} />
 
                     {/* Lock icon */}
                     <div style={{
