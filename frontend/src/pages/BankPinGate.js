@@ -119,9 +119,7 @@ export default function BankPinGate() {
             navigate("/bank");
         } catch (err) {
             if (err.response?.status === 401) {
-                setError("Session expired. Please login again.");
-                setTimeout(() => navigate("/"), 1500);
-            } else if (err.response?.status === 400) {
+                // Backend returns 401 for wrong PIN
                 const msg = err.response?.data?.message || "Incorrect PIN. Try again.";
                 setError(msg);
                 triggerShake();
