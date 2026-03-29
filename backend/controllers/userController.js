@@ -61,7 +61,10 @@ const changePassword = async (req, res) => {
 const deleteAccount = async (req, res) => {
   try {
     const userId = req.userId;
-    const { SavingsGoal, BankAccount, Transaction } = require("../models");
+    const SavingsGoal = require("../models/SavingsGoal");
+    const BankAccount = require("../models/BankAccount");
+    const Transaction = require("../models/Transaction");
+    
     await SavingsGoal.deleteMany({ userId });
     await BankAccount.deleteMany({ userId });
     await Transaction.deleteMany({ userId });
