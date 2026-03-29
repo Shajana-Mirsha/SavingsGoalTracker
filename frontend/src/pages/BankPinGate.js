@@ -35,7 +35,8 @@ export default function BankPinGate() {
                     // Not logged in
                     navigate("/");
                 } else if (err.response?.status === 404) {
-                    // No bank account yet → go setup
+                    // No bank account yet → go setup, trick BankRoute with temp token
+                    localStorage.setItem("bankToken", "setup_mode");
                     navigate("/bank");
                 } else {
                     // Any other error (network, 500) — don't redirect, just show error
