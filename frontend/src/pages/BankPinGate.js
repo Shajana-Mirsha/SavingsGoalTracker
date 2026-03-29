@@ -4,7 +4,7 @@ import axios from "axios";
 import { Lock, ShieldCheck, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import logo from "../assets/logo.svg";
 
-const API = "http://localhost:5000/api/bank";
+const API = `${process.env.REACT_APP_API_URL || "http://localhost:5000/api"}/bank`;
 
 export default function BankPinGate() {
     const [pin, setPin] = useState(["", "", "", ""]);
