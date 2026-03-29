@@ -81,7 +81,7 @@ export default function Dashboard() {
 
   const handleDelete = async (id) => {
     if (window.confirm("Permanently delete this milestone?")) {
-      await axios.delete(`http://localhost:5000/api/goals/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.delete(`${process.env.REACT_APP_API_URL || "http://localhost:5000/api"}/goals/${id}`, { headers: { Authorization: `Bearer ${token}` } });
       loadData();
     }
   };
@@ -175,7 +175,7 @@ export default function Dashboard() {
           <button onClick={() => { localStorage.clear(); navigate("/"); }} className="pro-input" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', background: '#f8fafc', border: 'none', marginBottom: '10px' }}>
             <LogOut size={18} /> Logout
           </button>
-          <button onClick={async () => { if (window.confirm("Delete account?")) { await axios.delete("http://localhost:5000/api/user/delete-account", { headers: { Authorization: `Bearer ${token}` } }); localStorage.clear(); navigate("/"); } }} style={{ width: '100%', background: 'none', border: 'none', color: 'var(--danger)', fontSize: '11px', fontWeight: '900', cursor: 'pointer' }}>
+          <button onClick={async () => { if (window.confirm("Delete account?")) { await axios.delete(`${process.env.REACT_APP_API_URL || "http://localhost:5000/api"}/user/delete-account`, { headers: { Authorization: `Bearer ${token}` } }); localStorage.clear(); navigate("/"); } }} style={{ width: '100%', background: 'none', border: 'none', color: 'var(--danger)', fontSize: '11px', fontWeight: '900', cursor: 'pointer' }}>
             <UserX size={14} /> DELETE ACCOUNT
           </button>
         </div>
@@ -339,7 +339,7 @@ function GoalCard({ goal, isCompleted, expandedId, setExpandedId, addMap, setAdd
                   <button className="btn-primary" style={{ padding: '8px 12px', background: 'var(--success)' }} onClick={async () => {
                     if (extendMap[goal._id]) {
                       try {
-                        await axios.put(`http://localhost:5000/api/goals/${goal._id}/extend`, { deadline: extendMap[goal._id] }, { headers: { Authorization: `Bearer ${token}` } });
+                        await axios.put(`${process.env.REACT_APP_API_URL || "http://localhost:5000/api"}/goals/${goal._id}/extend`, { deadline: extendMap[goal._id] }, { headers: { Authorization: `Bearer ${token}` } });
                         setExtendMap({ ...extendMap, [goal._id]: "" });
                         onRefresh();
                       } catch (err) {
@@ -354,7 +354,7 @@ function GoalCard({ goal, isCompleted, expandedId, setExpandedId, addMap, setAdd
                 <button className="btn-primary" style={{ padding: '10px' }} onClick={async () => {
                   if (addMap[goal._id] > 0) {
                     try {
-                      await axios.put(`http://localhost:5000/api/goals/${goal._id}`, { savedAmount: Number(addMap[goal._id]) }, { headers: { Authorization: `Bearer ${token}` } });
+                      await axios.put(`${process.env.REACT_APP_API_URL || "http://localhost:5000/api"}/goals/${goal._id}`, { savedAmount: Number(addMap[goal._id]) }, { headers: { Authorization: `Bearer ${token}` } });
                       setAddMap({ ...addMap, [goal._id]: "" });
                       onRefresh();
                     } catch (err) {
