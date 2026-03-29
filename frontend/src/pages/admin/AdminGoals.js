@@ -33,7 +33,7 @@ const AdminGoals = () => {
         if (!window.confirm("Delete this goal?")) return;
         try {
             const token = localStorage.getItem("token");
-            await axios.delete(`http://localhost:5000/api/admin/goals/${id}`, {
+            await axios.delete(`${process.env.REACT_APP_API_URL || "http://localhost:5000/api"}/admin/goals/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             fetchGoals();
@@ -53,7 +53,7 @@ const AdminGoals = () => {
         e.preventDefault();
         try {
             const token = localStorage.getItem("token");
-            await axios.put(`http://localhost:5000/api/admin/goals/${editingGoal._id}`, formData, {
+            await axios.put(`${process.env.REACT_APP_API_URL || "http://localhost:5000/api"}/admin/goals/${editingGoal._id}`, formData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setEditingGoal(null);
