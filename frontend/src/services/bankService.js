@@ -6,7 +6,7 @@ const getAuthHeaders = () => {
     return { headers: { Authorization: `Bearer ${token}` } };
 };
 
-const API_URL = "http://localhost:5000/api/bank";
+const API_URL = `${process.env.REACT_APP_API_URL}/bank`;
 
 const getAccount = async () => {
     const response = await axios.get(`${API_URL}/account`, getAuthHeaders());
