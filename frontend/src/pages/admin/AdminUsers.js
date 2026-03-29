@@ -22,7 +22,7 @@ const AdminUsers = () => {
     const fetchUsers = async () => {
         setLoading(true);
         try {
-            const res = await axios.get("http://localhost:5000/api/admin/users", {
+            const res = await axios.get(`${process.env.REACT_APP_API_URL || "http://localhost:5000/api"}/admin/users`, {
                 headers: { Authorization: `Bearer ${token()}` }
             });
             setUsers(res.data);
@@ -36,7 +36,7 @@ const AdminUsers = () => {
     const handleCreate = async (e) => {
         e.preventDefault();
         try {
-            await axios.post("http://localhost:5000/api/admin/users", formData, {
+            await axios.post(`${process.env.REACT_APP_API_URL || "http://localhost:5000/api"}/admin/users`, formData, {
                 headers: { Authorization: `Bearer ${token()}` }
             });
             setShowCreate(false);
@@ -50,7 +50,7 @@ const AdminUsers = () => {
     const handleDelete = async (id) => {
         if (!window.confirm("Permanently delete this user and all their data?")) return;
         try {
-            await axios.delete(`http://localhost:5000/api/admin/users/${id}`, {
+            await axios.delete(`${process.env.REACT_APP_API_URL || "http://localhost:5000/api"}/admin/users/${id}`, {
                 headers: { Authorization: `Bearer ${token()}` }
             });
             fetchUsers();
@@ -68,7 +68,7 @@ const AdminUsers = () => {
         e.preventDefault();
         setEditLoading(true);
         try {
-            await axios.put(`http://localhost:5000/api/admin/users/${editUser._id}`, editData, {
+            await axios.put(`${process.env.REACT_APP_API_URL || "http://localhost:5000/api"}/admin/users/${editUser._id}`, editData, {
                 headers: { Authorization: `Bearer ${token()}` }
             });
             setEditUser(null);
