@@ -236,7 +236,7 @@ export default function Login() {
         </div>
 
         {/* Google */}
-        <a href="http://localhost:5000/api/auth/google" style={{ textDecoration: "none" }}>
+        <a href={`${process.env.REACT_APP_API_URL || "http://localhost:5000/api"}/auth/google`} style={{ textDecoration: "none" }}>
           <button style={{
             width: "100%", padding: "14px",
             background: "rgba(255,255,255,0.05)",
