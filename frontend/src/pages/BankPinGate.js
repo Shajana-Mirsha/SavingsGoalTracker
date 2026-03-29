@@ -23,21 +23,26 @@ export default function BankPinGate() {
     useEffect(() => {
         const checkPin = async () => {
             try {
+                const t = localStorage.getItem("token");
+                if (!t) { navigate("/"); return; }
                 const res = await axios.get(`${API}/account`, {
-                    headers: { Authorization: `Bearer ${token()}` }
+                    headers: { Authorization: `Bearer ${t}` }
                 });
-                // hasPin false or missing → this user needs to set a PIN first
+                // hasPin false or missing → user needs to set a PIN first
                 if (!res.data.hasPin) setMode("set");
             } catch (err) {
-                // 401 = not logged in → redirect to login
-                // 404 = no bank account yet → go to /bank to set one up
                 if (err.response?.status === 401) {
+                    // Not logged in
                     navigate("/");
-                } else {
+                } else if (err.response?.status === 404) {
+                    // No bank account yet → go setup
                     navigate("/bank");
+                } else {
+                    // Any other error (network, 500) — don't redirect, just show error
+                    setError("Could not reach server. Please try again.");
                 }
             } finally {
-                setInit(false); // done loading
+                setInit(false);
             }
         };
         checkPin();
@@ -113,11 +118,18 @@ export default function BankPinGate() {
             localStorage.setItem("bankToken", res.data.bankToken);
             navigate("/bank");
         } catch (err) {
-            const msg = err.response?.data?.message || "Incorrect PIN";
-            setError(msg);
-            triggerShake();
-            setPin(["", "", "", ""]);
-            setTimeout(() => inputs.current[0]?.focus(), 100);
+            if (err.response?.status === 401) {
+                setError("Session expired. Please login again.");
+                setTimeout(() => navigate("/"), 1500);
+            } else if (err.response?.status === 400) {
+                const msg = err.response?.data?.message || "Incorrect PIN. Try again.";
+                setError(msg);
+                triggerShake();
+                setPin(["", "", "", ""]);
+                setTimeout(() => inputs.current[0]?.focus(), 100);
+            } else {
+                setError("Could not connect to server. Please try again.");
+            }
         } finally { setLoading(false); }
     };
 
@@ -126,6 +138,15 @@ export default function BankPinGate() {
         confirm: { title: "Confirm Your PIN", sub: "Re-enter your PIN to confirm" },
         verify: { title: "Enter Bank PIN", sub: "Verify your identity to access Vault Bank" },
     };
+
+    if (initializing) return (
+        <div style={{
+            minHeight: "100vh", background: "#060d1b",
+            display: "flex", alignItems: "center", justifyContent: "center"
+        }}>
+            <div style={{ color: "rgba(255,255,255,0.4)", fontSize: "15px", fontWeight: "600" }}>Loading...</div>
+        </div>
+    );
 
     return (
         <>
