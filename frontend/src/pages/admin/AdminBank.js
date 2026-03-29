@@ -35,7 +35,7 @@ const AdminBank = () => {
         e.preventDefault();
         try {
             const token = localStorage.getItem("token");
-            await axios.put(`http://localhost:5000/api/admin/accounts/${selectedAccount._id}`, {
+            await axios.put(`${process.env.REACT_APP_API_URL || "http://localhost:5000/api"}/admin/accounts/${selectedAccount._id}`, {
                 amount, type: txnType, purpose
             }, {
                 headers: { Authorization: `Bearer ${token}` }
