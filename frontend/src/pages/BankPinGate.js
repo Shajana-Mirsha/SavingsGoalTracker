@@ -8,30 +8,38 @@ const API = `${process.env.REACT_APP_API_URL || "http://localhost:5000/api"}/ban
 
 export default function BankPinGate() {
     const [pin, setPin] = useState(["", "", "", ""]);
-    const [mode, setMode] = useState("verify");   // "verify" | "set" | "confirm"
+    const [mode, setMode] = useState("verify");
     const [firstPin, setFirstPin] = useState(null);
     const [showPin, setShowPin] = useState(false);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
-    const [initializing, setInit] = useState(true); // loading while checking hasPin
+    const [initializing, setInit] = useState(true);
     const [shake, setShake] = useState(false);
     const inputs = useRef([]);
     const navigate = useNavigate();
     const token = () => localStorage.getItem("token");
 
-    // Check if PIN is already set for this account
     useEffect(() => {
         const checkPin = async () => {
             try {
+                const t = localStorage.getItem("token");
+                if (!t) {
+                    navigate("/");
+                    return;
+                }
                 const res = await axios.get(`${API}/account`, {
-                    headers: { Authorization: `Bearer ${token()}` }
+                    headers: { Authorization: `Bearer ${t}` }
                 });
-                // hasPin false or missing → this user needs to set a PIN first
                 if (!res.data.hasPin) setMode("set");
             } catch {
-                navigate("/");
+                const t = localStorage.getItem("token");
+                if (!t) {
+                    navigate("/");
+                } else {
+                    setError("Failed to connect. Please go back and try again.");
+                }
             } finally {
-                setInit(false); // done loading
+                setInit(false);
             }
         };
         checkPin();
@@ -86,7 +94,6 @@ export default function BankPinGate() {
                 await axios.post(`${API}/set-pin`, { pin: firstPin }, {
                     headers: { Authorization: `Bearer ${token()}` }
                 });
-                // Now verify immediately with the new PIN
                 const res = await axios.post(`${API}/verify-pin`, { pin: firstPin }, {
                     headers: { Authorization: `Bearer ${token()}` }
                 });
@@ -98,7 +105,6 @@ export default function BankPinGate() {
             return;
         }
 
-        // mode === "verify"
         setLoading(true);
         try {
             const res = await axios.post(`${API}/verify-pin`, { pin: pinStr }, {
@@ -120,6 +126,12 @@ export default function BankPinGate() {
         confirm: { title: "Confirm Your PIN", sub: "Re-enter your PIN to confirm" },
         verify: { title: "Enter Bank PIN", sub: "Verify your identity to access Vault Bank" },
     };
+
+    if (initializing) return (
+        <div style={{ minHeight: "100vh", background: "#060d1b", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: "16px" }}>
+            Loading...
+        </div>
+    );
 
     return (
         <>
@@ -158,7 +170,6 @@ export default function BankPinGate() {
                 display: "flex", alignItems: "center", justifyContent: "center",
                 position: "relative", overflow: "hidden", padding: "24px"
             }}>
-                {/* Orbs */}
                 <div style={{
                     position: "absolute", top: "5%", left: "10%", width: "350px", height: "350px",
                     background: "radial-gradient(circle, rgba(37,99,235,0.25) 0%, transparent 70%)",
@@ -170,7 +181,6 @@ export default function BankPinGate() {
                     borderRadius: "50%", filter: "blur(50px)", animation: "orbFloat 13s ease-in-out 2s infinite reverse"
                 }} />
 
-                {/* Card */}
                 <div className="pin-card" style={{
                     background: "rgba(255,255,255,0.04)", backdropFilter: "blur(24px)",
                     border: "1px solid rgba(255,255,255,0.1)", borderRadius: "28px",
@@ -178,10 +188,8 @@ export default function BankPinGate() {
                     boxShadow: "0 32px 80px rgba(0,0,0,0.5)",
                     position: "relative", zIndex: 10, textAlign: "center"
                 }}>
-                    {/* Logo */}
                     <img src={logo} alt="Vault Goal" style={{ height: "52px", marginBottom: "24px" }} />
 
-                    {/* Lock icon */}
                     <div style={{
                         background: "rgba(37,99,235,0.2)", width: "64px", height: "64px",
                         borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
@@ -197,7 +205,6 @@ export default function BankPinGate() {
                         {titles[mode].sub}
                     </p>
 
-                    {/* PIN inputs */}
                     <div className={shake ? "pin-shake" : ""} style={{ display: "flex", gap: "12px", justifyContent: "center", marginBottom: "24px" }}>
                         {pin.map((digit, idx) => (
                             <input
@@ -214,7 +221,6 @@ export default function BankPinGate() {
                         ))}
                     </div>
 
-                    {/* Show PIN toggle */}
                     <button onClick={() => setShowPin(!showPin)} style={{
                         background: "none", border: "none", cursor: "pointer",
                         color: "rgba(255,255,255,0.4)", display: "flex", alignItems: "center",
@@ -224,7 +230,6 @@ export default function BankPinGate() {
                         {showPin ? "Hide PIN" : "Show PIN"}
                     </button>
 
-                    {/* Error */}
                     {error && (
                         <div style={{
                             background: "rgba(239,68,68,0.15)", border: "1px solid rgba(239,68,68,0.3)",
@@ -235,7 +240,6 @@ export default function BankPinGate() {
                         </div>
                     )}
 
-                    {/* Submit button */}
                     <button onClick={handleSubmit} disabled={loading} style={{
                         width: "100%", padding: "14px", background: "#2563eb", color: "white",
                         border: "none", borderRadius: "13px", fontWeight: "800", fontSize: "15px",
@@ -247,7 +251,6 @@ export default function BankPinGate() {
                         {loading ? "Verifying..." : mode === "verify" ? "Access Bank" : mode === "set" ? "Continue" : "Confirm PIN"}
                     </button>
 
-                    {/* Back link */}
                     <button onClick={() => navigate("/dashboard")} style={{
                         marginTop: "18px", background: "none", border: "none",
                         color: "rgba(255,255,255,0.35)", cursor: "pointer", fontSize: "13px",
