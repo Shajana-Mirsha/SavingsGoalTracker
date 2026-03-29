@@ -3,7 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { User, Mail, Lock, Save, Trash2, ArrowLeft, CheckCircle } from "lucide-react";
 
-const API = "http://localhost:5000/api";
+const API = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 
 export default function Profile() {
     const [profile, setProfile] = useState({ name: "", email: "" });
