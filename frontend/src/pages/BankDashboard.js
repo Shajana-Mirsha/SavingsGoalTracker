@@ -58,8 +58,8 @@ const BankDashboard = () => {
 
         try {
             await bankService.setupAccount(payload);
-            // Refresh to go to dashboard
-            window.location.reload();
+// Redirect to PIN setup for new users
+navigate("/bank-pin");
         } catch (err) {
             console.error("Setup failed", err);
 
