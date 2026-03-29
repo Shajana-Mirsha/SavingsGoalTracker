@@ -16,14 +16,17 @@ import AdminBank from "./pages/admin/AdminBank";
 import AdminGoals from "./pages/admin/AdminGoals";
 import AdminTransactions from "./pages/admin/AdminTransactions";
 
-// Helper for Admin Route Protection
+// Admin Route Protection
 const AdminRoute = ({ children }) => {
-  // Ideally, decode token to check role. For demo, we trust local storage "role" set on login
-  // or just let backend reject if unauthorized. Better to check role here for UX.
-  // We'll update Login to set role in localStorage.
   const token = localStorage.getItem("token");
-  const role = localStorage.getItem("role"); // We need to set this on Login
+  const role = localStorage.getItem("role");
   return token && role === "ADMIN" ? children : <Navigate to="/" />;
+};
+
+// Bank Route Protection — requires bankToken from PIN verification
+const BankRoute = ({ children }) => {
+  const bankToken = localStorage.getItem("bankToken");
+  return bankToken ? children : <Navigate to="/bank-pin" />;
 };
 
 function App() {
@@ -37,8 +40,8 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/bank-pin" element={<BankPinGate />} />
-        <Route path="/bank" element={<BankDashboard />} />
-        <Route path="/bank/statement" element={<BankStatement />} />
+        <Route path="/bank" element={<BankRoute><BankDashboard /></BankRoute>} />
+        <Route path="/bank/statement" element={<BankRoute><BankStatement /></BankRoute>} />
 
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
