@@ -14,7 +14,7 @@ const AdminTransactions = () => {
     const fetchTransactions = async () => {
         try {
             const token = localStorage.getItem("token");
-            const res = await axios.get("http://localhost:5000/api/admin/transactions", {
+            const res = await axios.get(`${process.env.REACT_APP_API_URL || "http://localhost:5000/api"}/admin/transactions`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setTransactions(res.data);
@@ -29,7 +29,7 @@ const AdminTransactions = () => {
         if (!window.confirm("Reverse this transaction? This will create a counter-transaction.")) return;
         const token = localStorage.getItem("token");
         try {
-            await axios.post(`http://localhost:5000/api/admin/transactions/${id}/reverse`, {}, {
+            await axios.post(`${process.env.REACT_APP_API_URL || "http://localhost:5000/api"}/admin/transactions/${id}/reverse`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             alert("Transaction reversed successfully.");
