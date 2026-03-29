@@ -5,14 +5,17 @@ const savingsGoalSchema = new mongoose.Schema({
   goalName: String,
   targetAmount: Number,
   savedAmount: { type: Number, default: 0 },
-
+  deadline: { type: Date }, // Ensure this is present
   history: [
     {
       amount: Number,
       date: { type: Date, default: Date.now }
     }
   ],
-
+  isDeleted: {
+    type: Boolean,
+    default: false
+  },
   completedAt: Date
 }, { timestamps: true });
 

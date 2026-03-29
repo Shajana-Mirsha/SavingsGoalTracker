@@ -1,69 +1,89 @@
 const SavingsGoal = require("../models/SavingsGoal");
-
-const getGoals = async (req, res) => {
-  try {
-    // Find goals where userId matches the logged-in user
-    const goals = await SavingsGoal.find({ userId: req.userId });
-    res.json(goals);
-  } catch (err) {
-    res.status(500).json({ message: "Server error fetching goals" });
-  }
-};
+const { processTransaction } = require("./bankController");
 
 const createGoal = async (req, res) => {
   try {
-    const { goalName, targetAmount } = req.body;
+    const { goalName, targetAmount, deadline } = req.body;
     const newGoal = new SavingsGoal({
       userId: req.userId,
       goalName,
       targetAmount,
+      deadline,
       savedAmount: 0,
       history: []
     });
     await newGoal.save();
     res.status(201).json(newGoal);
   } catch (err) {
-    res.status(500).json({ message: "Server error creating goal" });
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+const getGoals = async (req, res) => {
+  try {
+    const goals = await SavingsGoal.find({ userId: req.userId, isDeleted: false });
+    res.json(goals);
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
   }
 };
 
 const updateGoal = async (req, res) => {
   try {
-    const goal = await SavingsGoal.findOne({ _id: req.params.id, userId: req.userId });
-    const amount = Number(req.body.savedAmount);
+    const { savedAmount } = req.body;
+    const goal = await SavingsGoal.findById(req.params.id);
+    if (!goal) return res.status(404).json({ message: "Goal not found" });
 
-    if (!goal || amount <= 0) {
-      return res.status(400).json({ message: "Invalid update or goal not found" });
+    // Deduct from Bank Account
+    try {
+      await processTransaction({
+        userId: req.userId,
+        type: "DEBIT",
+        amount: Number(savedAmount),
+        purpose: `Contribution to ${goal.goalName}`,
+        relatedGoalId: goal._id
+      });
+    } catch (bankErr) {
+      return res.status(400).json({ message: bankErr.message });
     }
 
-    goal.savedAmount += amount;
-    goal.history.push({ amount, date: new Date() });
-
-    if (goal.savedAmount >= goal.targetAmount && !goal.completedAt) {
-      goal.completedAt = new Date();
-    }
+    goal.savedAmount += Number(savedAmount);
+    goal.history.push({ amount: Number(savedAmount), date: new Date() });
 
     await goal.save();
     res.json(goal);
   } catch (err) {
-    res.status(500).json({ message: "Update failed" });
+    res.status(500).json({ message: "Server error" });
   }
 };
 
 const deleteGoal = async (req, res) => {
   try {
-    const result = await SavingsGoal.findOneAndDelete({ _id: req.params.id, userId: req.userId });
-    if (!result) return res.status(404).json({ message: "Goal not found" });
+    await SavingsGoal.findByIdAndDelete(req.params.id);
     res.json({ message: "Goal deleted" });
   } catch (err) {
-    res.status(500).json({ message: "Delete failed" });
+    res.status(500).json({ message: "Server error" });
   }
 };
 
-// Exporting all functions as an object to fix the "handler must be a function" error
+const extendGoalDate = async (req, res) => {
+  try {
+    const { deadline } = req.body;
+    const goal = await SavingsGoal.findOne({ _id: req.params.id, userId: req.userId });
+    if (!goal) return res.status(404).json({ message: "Goal not found" });
+
+    goal.deadline = deadline;
+    await goal.save();
+    res.json(goal);
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 module.exports = {
-  getGoals,
   createGoal,
+  getGoals,
   updateGoal,
-  deleteGoal
+  deleteGoal,
+  extendGoalDate
 };

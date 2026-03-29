@@ -1,12 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const auth = require("../middleware/authMiddleware");
 const goalController = require("../controllers/goalController");
+const auth = require("../middleware/authMiddleware");
 
-// These will now work because the functions are correctly exported in goalController.js
-router.post("/", auth, goalController.createGoal);
+// If any of these are undefined, Node will throw that TypeError
+router.post("/", auth, goalController.createGoal);   // Line 7
 router.get("/", auth, goalController.getGoals);
 router.put("/:id", auth, goalController.updateGoal);
+router.put("/:id/extend", auth, goalController.extendGoalDate);
 router.delete("/:id", auth, goalController.deleteGoal);
 
 module.exports = router;

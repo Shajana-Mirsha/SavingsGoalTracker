@@ -8,9 +8,13 @@ module.exports = (req, res, next) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.userId = decoded.userId;
+    console.log("AUTH DEBUG: Decoded:", decoded);
+    req.userId = decoded.userId || decoded.id;
+    console.log("AUTH DEBUG: req.userId set to:", req.userId);
     next();
   } catch (err) {
+    console.error("AUTH ERROR:", err.message);
+    if (!process.env.JWT_SECRET) console.error("CRITICAL: JWT_SECRET IS MISSING IN ENV");
     return res.status(401).json({ message: "Invalid token" });
   }
 };

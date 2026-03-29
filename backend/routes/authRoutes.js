@@ -23,8 +23,9 @@ router.get(
       process.env.JWT_SECRET
     );
 
+    console.log(`Google Callback - User: ${req.user.email}, Role: ${req.user.role}`); // DEBUG LOG
     res.redirect(
-      `http://localhost:3000/dashboard?token=${token}`
+      `http://localhost:3000/dashboard?token=${token}&role=${req.user.role}`
     );
   }
 );
