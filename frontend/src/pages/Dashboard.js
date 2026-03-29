@@ -1,3 +1,12 @@
+// Save Google token IMMEDIATELY before React mounts
+const params = new URLSearchParams(window.location.search);
+const _token = params.get("token");
+const _role = params.get("role");
+if (_token) {
+  localStorage.setItem("token", _token);
+  localStorage.setItem("role", _role || "USER");
+}
+
 import { useEffect, useState, useCallback } from "react";
 import { createGoal, getGoals } from "../services/api";
 import axios from "axios";
@@ -8,6 +17,8 @@ import {
 } from "lucide-react";
 import logo from "../assets/logo.svg";
 
+const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+
 export default function Dashboard() {
   const [token, setToken] = useState(() => localStorage.getItem("token"));
   const [goals, setGoals] = useState([]);
@@ -17,10 +28,8 @@ export default function Dashboard() {
   const [selectedBar, setSelectedBar] = useState(null);
   const [addMap, setAddMap] = useState({});
   const [extendMap, setExtendMap] = useState({});
-  const [chartOffset, setChartOffset] = useState(0); // 0 = current period, 1 = prev, 2 = prev-prev...
-
+  const [chartOffset, setChartOffset] = useState(0);
   const [expandedId, setExpandedId] = useState(null);
-
   const [newName, setNewName] = useState("");
   const [newTarget, setNewTarget] = useState("");
   const [newDeadline, setNewDeadline] = useState("");
@@ -40,26 +49,21 @@ export default function Dashboard() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const googleToken = params.get("token");
-    const googleRole = params.get("role"); // Get role from URL
-
-    // Debugging logs
-    if (googleRole) console.log("Google Role from URL:", googleRole);
+    const googleRole = params.get("role");
 
     if (googleToken) {
       localStorage.setItem("token", googleToken);
-      if (googleRole) localStorage.setItem("role", googleRole);
+      localStorage.setItem("role", googleRole || "USER");
       setToken(googleToken);
 
-      // Auto-redirect if Admin
       if (googleRole === "ADMIN") {
-        window.location.href = "/admin/dashboard"; // Force reload/redirect
+        window.location.href = "/admin/dashboard";
         return;
       }
 
       window.history.replaceState({}, document.title, "/dashboard");
       loadData(googleToken);
     } else {
-      // Check existing local storage role
       const storedRole = localStorage.getItem("role");
       if (storedRole === "ADMIN") {
         navigate("/admin/dashboard");
@@ -81,7 +85,7 @@ export default function Dashboard() {
 
   const handleDelete = async (id) => {
     if (window.confirm("Permanently delete this milestone?")) {
-      await axios.delete(`${process.env.REACT_APP_API_URL || "http://localhost:5000/api"}/goals/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.delete(`${API_BASE}/goals/${id}`, { headers: { Authorization: `Bearer ${token}` } });
       loadData();
     }
   };
@@ -97,21 +101,18 @@ export default function Dashboard() {
   const getAnalyticsData = (type) => {
     const stats = {};
     if (type === 'daily') {
-      // Each offset = 7 days back
       const baseOffset = chartOffset * 7;
       for (let i = 6; i >= 0; i--) {
         const d = new Date(); d.setDate(d.getDate() - i - baseOffset);
         stats[d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })] = 0;
       }
     } else if (type === 'weekly') {
-      // Each offset = 4 weeks back
       const baseOffset = chartOffset * 4;
       for (let i = 3; i >= 0; i--) {
         const d = new Date(); d.setDate(d.getDate() - ((i + baseOffset) * 7));
         stats[getWeekRange(d)] = 0;
       }
     } else if (type === 'monthly') {
-      // Each offset = 6 months back
       const baseOffset = chartOffset * 6;
       for (let i = 5; i >= 0; i--) {
         const d = new Date(); d.setMonth(d.getMonth() - i - baseOffset);
@@ -175,7 +176,13 @@ export default function Dashboard() {
           <button onClick={() => { localStorage.clear(); navigate("/"); }} className="pro-input" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', background: '#f8fafc', border: 'none', marginBottom: '10px' }}>
             <LogOut size={18} /> Logout
           </button>
-          <button onClick={async () => { if (window.confirm("Delete account?")) { await axios.delete(`${process.env.REACT_APP_API_URL || "http://localhost:5000/api"}/user/delete-account`, { headers: { Authorization: `Bearer ${token}` } }); localStorage.clear(); navigate("/"); } }} style={{ width: '100%', background: 'none', border: 'none', color: 'var(--danger)', fontSize: '11px', fontWeight: '900', cursor: 'pointer' }}>
+          <button onClick={async () => {
+            if (window.confirm("Delete account?")) {
+              await axios.delete(`${API_BASE}/user/delete-account`, { headers: { Authorization: `Bearer ${token}` } });
+              localStorage.clear();
+              navigate("/");
+            }
+          }} style={{ width: '100%', background: 'none', border: 'none', color: 'var(--danger)', fontSize: '11px', fontWeight: '900', cursor: 'pointer' }}>
             <UserX size={14} /> DELETE ACCOUNT
           </button>
         </div>
@@ -212,18 +219,15 @@ export default function Dashboard() {
               </h2>
             </div>
 
-            {/* Prev / Next Navigation */}
             <div style={{ position: 'absolute', top: '25px', right: '20px', display: 'flex', gap: '8px', alignItems: 'center' }}>
               <button
                 onClick={() => { setChartOffset(o => o + 1); setSelectedBar(null); }}
                 style={{ background: '#f1f5f9', border: 'none', borderRadius: '8px', padding: '8px 14px', cursor: 'pointer', fontWeight: '800', color: '#475569', fontSize: '16px' }}
-                title="Previous period"
               >‹ Prev</button>
               {chartOffset > 0 && (
                 <button
                   onClick={() => { setChartOffset(o => o - 1); setSelectedBar(null); }}
                   style={{ background: 'var(--primary)', border: 'none', borderRadius: '8px', padding: '8px 14px', cursor: 'pointer', fontWeight: '800', color: 'white', fontSize: '16px' }}
-                  title="Next period"
                 >Next ›</button>
               )}
               {chartOffset > 0 && (
@@ -247,8 +251,6 @@ export default function Dashboard() {
           </div>
         )}
 
-
-        {/* Added alignItems: 'start' below to prevent neighboring cards from stretching */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(450px, 1fr))', gap: '24px', alignItems: 'start' }}>
           {(currentTab === 'active' ? activeG : achievedG).map(g => (
             <GoalCard
@@ -276,6 +278,7 @@ function GoalCard({ goal, isCompleted, expandedId, setExpandedId, addMap, setAdd
   const isExpanded = expandedId !== null && expandedId === goal._id;
   const pct = Math.min(Math.round((goal.savedAmount / goal.targetAmount) * 100), 100);
   const isOverdue = !isCompleted && goal.deadline && new Date(goal.deadline) < new Date();
+  const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 
   return (
     <div className="card-pro" style={{ borderTop: isCompleted ? '6px solid var(--success)' : isOverdue ? '6px solid var(--danger)' : '1px solid var(--border)' }}>
@@ -301,7 +304,6 @@ function GoalCard({ goal, isCompleted, expandedId, setExpandedId, addMap, setAdd
       )}
 
       {isCompleted ? (
-        /* Added marginBottom: '20px' below to create space for the button */
         <div style={{ background: '#f0fdf4', padding: '25px', borderRadius: '20px', textAlign: 'center', border: '1px solid #dcfce7', marginBottom: '20px' }}>
           <CheckCircle size={32} color="var(--success)" style={{ marginBottom: '10px' }} />
           <div style={{ fontSize: '12px', fontWeight: '900', color: '#166534', marginBottom: '5px' }}>TOTAL ACHIEVED SAVINGS</div>
@@ -339,7 +341,7 @@ function GoalCard({ goal, isCompleted, expandedId, setExpandedId, addMap, setAdd
                   <button className="btn-primary" style={{ padding: '8px 12px', background: 'var(--success)' }} onClick={async () => {
                     if (extendMap[goal._id]) {
                       try {
-                        await axios.put(`${process.env.REACT_APP_API_URL || "http://localhost:5000/api"}/goals/${goal._id}/extend`, { deadline: extendMap[goal._id] }, { headers: { Authorization: `Bearer ${token}` } });
+                        await axios.put(`${API_BASE}/goals/${goal._id}/extend`, { deadline: extendMap[goal._id] }, { headers: { Authorization: `Bearer ${token}` } });
                         setExtendMap({ ...extendMap, [goal._id]: "" });
                         onRefresh();
                       } catch (err) {
@@ -354,7 +356,7 @@ function GoalCard({ goal, isCompleted, expandedId, setExpandedId, addMap, setAdd
                 <button className="btn-primary" style={{ padding: '10px' }} onClick={async () => {
                   if (addMap[goal._id] > 0) {
                     try {
-                      await axios.put(`${process.env.REACT_APP_API_URL || "http://localhost:5000/api"}/goals/${goal._id}`, { savedAmount: Number(addMap[goal._id]) }, { headers: { Authorization: `Bearer ${token}` } });
+                      await axios.put(`${API_BASE}/goals/${goal._id}`, { savedAmount: Number(addMap[goal._id]) }, { headers: { Authorization: `Bearer ${token}` } });
                       setAddMap({ ...addMap, [goal._id]: "" });
                       onRefresh();
                     } catch (err) {
