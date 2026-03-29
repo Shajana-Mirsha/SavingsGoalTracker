@@ -213,7 +213,7 @@ export default function Register() {
         {/* Google */}
         <button
           type="button"
-          onClick={() => window.location.href = "http://localhost:5000/api/auth/google"}
+          onClick={() => window.location.href = `${process.env.REACT_APP_API_URL || "http://localhost:5000/api"}/auth/google`}
           style={{
             width: "100%", padding: "14px",
             background: "rgba(255,255,255,0.05)",
