@@ -184,8 +184,16 @@ export default function BankPinGate() {
                     boxShadow: "0 32px 80px rgba(0,0,0,0.5)",
                     position: "relative", zIndex: 10, textAlign: "center"
                 }}>
-                    {/* Logo */}
-                    <img src={logo} alt="Vault Goal" style={{ height: "52px", marginBottom: "24px" }} />
+                    {/* Logo — white background so it's visible on dark */}
+                    <div style={{
+                        display: "inline-flex", alignItems: "center", justifyContent: "center",
+                        background: "rgba(255,255,255,0.92)",
+                        padding: "10px 20px", borderRadius: "16px",
+                        marginBottom: "24px",
+                        boxShadow: "0 4px 20px rgba(0,0,0,0.3)"
+                    }}>
+                        <img src={logo} alt="Vault Goal" style={{ height: "40px" }} />
+                    </div>
 
                     {/* Lock icon */}
                     <div style={{
