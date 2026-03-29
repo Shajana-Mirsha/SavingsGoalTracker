@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import bankService from "../services/bankService";
 import { CreditCard, Plus, History, ArrowRight, ShieldCheck, Wallet, Banknote, Eye, EyeOff } from "lucide-react";
 import logo from "../assets/logo.svg";
