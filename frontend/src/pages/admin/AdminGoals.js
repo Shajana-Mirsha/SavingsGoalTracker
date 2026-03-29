@@ -18,7 +18,7 @@ const AdminGoals = () => {
     const fetchGoals = async () => {
         try {
             const token = localStorage.getItem("token");
-            const res = await axios.get("http://localhost:5000/api/admin/goals", {
+            const res = await axios.get(`${process.env.REACT_APP_API_URL || "http://localhost:5000/api"}/admin/goals`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setGoals(res.data);
