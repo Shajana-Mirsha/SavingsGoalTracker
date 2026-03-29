@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Lock, ShieldCheck, Eye, EyeOff, ArrowLeft } from "lucide-react";
-import logo from "../assets/logo.svg";
 
 const API = `${process.env.REACT_APP_API_URL || "http://localhost:5000/api"}/bank`;
 
@@ -31,12 +30,13 @@ export default function BankPinGate() {
                     headers: { Authorization: `Bearer ${t}` }
                 });
                 if (!res.data.hasPin) setMode("set");
-            } catch {
+            } catch (err) {
                 const t = localStorage.getItem("token");
                 if (!t) {
                     navigate("/");
                 } else {
-                    setError("Failed to connect. Please go back and try again.");
+                    // Account might not exist yet — send to dashboard to set up
+                    navigate("/dashboard");
                 }
             } finally {
                 setInit(false);
@@ -128,7 +128,11 @@ export default function BankPinGate() {
     };
 
     if (initializing) return (
-        <div style={{ minHeight: "100vh", background: "#060d1b", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: "16px" }}>
+        <div style={{
+            minHeight: "100vh", background: "#060d1b",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            color: "white", fontSize: "16px", fontFamily: "inherit"
+        }}>
             Loading...
         </div>
     );
@@ -136,40 +140,44 @@ export default function BankPinGate() {
     return (
         <>
             <style>{`
-        @keyframes pinShake {
-          0%,100% { transform: translateX(0); }
-          20%,60% { transform: translateX(-8px); }
-          40%,80% { transform: translateX(8px); }
-        }
-        .pin-shake { animation: pinShake 0.4s ease; }
-        .pin-box {
-          width: 56px; height: 64px;
-          background: rgba(255,255,255,0.07);
-          border: 2px solid rgba(255,255,255,0.15);
-          border-radius: 14px;
-          font-size: 28px; font-weight: 900;
-          color: white; text-align: center;
-          outline: none; caret-color: transparent;
-          transition: border-color 0.2s, background 0.2s;
-          font-family: monospace;
-        }
-        .pin-box:focus {
-          border-color: #3b82f6;
-          background: rgba(59,130,246,0.15);
-        }
-        @keyframes cardIn {
-          from { opacity: 0; transform: translateY(30px) scale(0.97); }
-          to   { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        .pin-card { animation: cardIn 0.5s cubic-bezier(0.22,1,0.36,1) both; }
-        @keyframes orbFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
-      `}</style>
+                @keyframes pinShake {
+                    0%,100% { transform: translateX(0); }
+                    20%,60% { transform: translateX(-8px); }
+                    40%,80% { transform: translateX(8px); }
+                }
+                .pin-shake { animation: pinShake 0.4s ease; }
+                .pin-box {
+                    width: 56px; height: 64px;
+                    background: rgba(255,255,255,0.07);
+                    border: 2px solid rgba(255,255,255,0.15);
+                    border-radius: 14px;
+                    font-size: 28px; font-weight: 900;
+                    color: white; text-align: center;
+                    outline: none; caret-color: transparent;
+                    transition: border-color 0.2s, background 0.2s;
+                    font-family: monospace;
+                }
+                .pin-box:focus {
+                    border-color: #3b82f6;
+                    background: rgba(59,130,246,0.15);
+                }
+                @keyframes cardIn {
+                    from { opacity: 0; transform: translateY(30px) scale(0.97); }
+                    to   { opacity: 1; transform: translateY(0) scale(1); }
+                }
+                .pin-card { animation: cardIn 0.5s cubic-bezier(0.22,1,0.36,1) both; }
+                @keyframes orbFloat {
+                    0%,100% { transform: translateY(0); }
+                    50% { transform: translateY(-20px); }
+                }
+            `}</style>
 
             <div style={{
                 minHeight: "100vh", background: "#060d1b",
                 display: "flex", alignItems: "center", justifyContent: "center",
                 position: "relative", overflow: "hidden", padding: "24px"
             }}>
+                {/* Orbs */}
                 <div style={{
                     position: "absolute", top: "5%", left: "10%", width: "350px", height: "350px",
                     background: "radial-gradient(circle, rgba(37,99,235,0.25) 0%, transparent 70%)",
@@ -181,6 +189,7 @@ export default function BankPinGate() {
                     borderRadius: "50%", filter: "blur(50px)", animation: "orbFloat 13s ease-in-out 2s infinite reverse"
                 }} />
 
+                {/* Card */}
                 <div className="pin-card" style={{
                     background: "rgba(255,255,255,0.04)", backdropFilter: "blur(24px)",
                     border: "1px solid rgba(255,255,255,0.1)", borderRadius: "28px",
@@ -188,8 +197,24 @@ export default function BankPinGate() {
                     boxShadow: "0 32px 80px rgba(0,0,0,0.5)",
                     position: "relative", zIndex: 10, textAlign: "center"
                 }}>
-                    <img src={logo} alt="Vault Goal" style={{ height: "52px", marginBottom: "24px" }} />
 
+                    {/* Logo — white background so it's visible on dark */}
+                    <div style={{
+                        display: "inline-flex", alignItems: "center", justifyContent: "center",
+                        background: "rgba(255,255,255,0.95)",
+                        padding: "10px 20px", borderRadius: "16px",
+                        marginBottom: "24px",
+                        boxShadow: "0 4px 20px rgba(0,0,0,0.3)"
+                    }}>
+                        <span style={{
+                            fontSize: "22px", fontWeight: "900", color: "#0f172a",
+                            letterSpacing: "-0.5px", fontFamily: "inherit"
+                        }}>
+                            🔒 Vault Bank
+                        </span>
+                    </div>
+
+                    {/* Lock icon */}
                     <div style={{
                         background: "rgba(37,99,235,0.2)", width: "64px", height: "64px",
                         borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
@@ -205,6 +230,7 @@ export default function BankPinGate() {
                         {titles[mode].sub}
                     </p>
 
+                    {/* PIN inputs */}
                     <div className={shake ? "pin-shake" : ""} style={{ display: "flex", gap: "12px", justifyContent: "center", marginBottom: "24px" }}>
                         {pin.map((digit, idx) => (
                             <input
@@ -221,6 +247,7 @@ export default function BankPinGate() {
                         ))}
                     </div>
 
+                    {/* Show PIN toggle */}
                     <button onClick={() => setShowPin(!showPin)} style={{
                         background: "none", border: "none", cursor: "pointer",
                         color: "rgba(255,255,255,0.4)", display: "flex", alignItems: "center",
@@ -230,6 +257,7 @@ export default function BankPinGate() {
                         {showPin ? "Hide PIN" : "Show PIN"}
                     </button>
 
+                    {/* Error */}
                     {error && (
                         <div style={{
                             background: "rgba(239,68,68,0.15)", border: "1px solid rgba(239,68,68,0.3)",
@@ -240,6 +268,7 @@ export default function BankPinGate() {
                         </div>
                     )}
 
+                    {/* Submit button */}
                     <button onClick={handleSubmit} disabled={loading} style={{
                         width: "100%", padding: "14px", background: "#2563eb", color: "white",
                         border: "none", borderRadius: "13px", fontWeight: "800", fontSize: "15px",
@@ -251,6 +280,7 @@ export default function BankPinGate() {
                         {loading ? "Verifying..." : mode === "verify" ? "Access Bank" : mode === "set" ? "Continue" : "Confirm PIN"}
                     </button>
 
+                    {/* Back link */}
                     <button onClick={() => navigate("/dashboard")} style={{
                         marginTop: "18px", background: "none", border: "none",
                         color: "rgba(255,255,255,0.35)", cursor: "pointer", fontSize: "13px",
